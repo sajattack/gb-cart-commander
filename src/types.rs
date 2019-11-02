@@ -48,14 +48,17 @@ impl fmt::Display for StatusResponse {
         )?;
         writeln!(f, "Flash Device ID: {:#04x}", self.flash_device_id)?;
         writeln!(f, "Nintendo logo correct: {}", self.cart_logo_correct == 0x01)?;
-        writeln!(f, "Cartridge licensee: {:?}",
-            //if self.cart_old_licensee == 0x33 {
-            //  u16::from_be_bytes([self.cart_new_licensee_hi, self.cart_new_licensee_lo])
-            //} else {
+        if self.cart_old_licensee == 0x33 {
+            writeln!(f, "Cartridge Licensee: {:?}", 
+                NewLicensee::n(
+                    u16::from_be_bytes([self.cart_new_licensee_hi, self.cart_new_licensee_lo])
+                ).unwrap_or(NewLicensee::Unknown))?;
+        } else {
+            writeln!(f, "Cartridge Licensee: {:?}", 
                 OldLicensee::n(self.cart_old_licensee)
                     .unwrap_or(OldLicensee::Unknown)
-            //}
-        )?;
+            )?;
+        }
         writeln!(f, "SGB Enhanced: {}", self.cart_sgb != 0)?;
         writeln!(f, "Cartridge Type: {:?}", 
             CartType::n(self.cart_type).unwrap_or(CartType::Unknown)
@@ -117,7 +120,7 @@ pub enum FlashManufacturer {
 #[repr(u8)]
 #[derive(Debug, N)]
 pub enum OldLicensee {
-    NoLicense = 0x00,
+    Unlicensed = 0x00,
     nintendo = 0x01,
     Unknown = 0x02,
     capcom = 0x08,
@@ -136,10 +139,10 @@ pub enum OldLicensee {
     San_X = 0x25,
     Kotobuki_Systems = 0x28,
     Seta = 0x29,
-    Infogrames = 0x30,
+    infogrames = 0x30,
     Nintendo = 0x31, 
     Bandai = 0x32,
-    Konami = 0x34,
+    konami = 0x34,
     Hector = 0x35,
     Capcom = 0x38,
     Banpresto = 0x39,
@@ -173,7 +176,7 @@ pub enum OldLicensee {
     Electronic_Arts = 0x69,
     elite_systems = 0x6E,
     Electro_Brain = 0x6F,
-    Infogrammes = 0x70,
+    Infogrames = 0x70,
     Interplay = 0x71,
     Broderbund = 0x72,
     Sculptered_Soft = 0x73,
@@ -204,7 +207,7 @@ pub enum OldLicensee {
     Nova = 0x9F,
     Hori_Electric = 0xA1,
     bandai = 0xA2,
-    konami = 0xA4,
+    Konami = 0xA4,
     Kawada = 0xA6,
     Takara = 0xA7,
     Technos_Japan = 0xA9,
@@ -267,9 +270,84 @@ pub enum OldLicensee {
     LJN_
 }
 
-//#[repr(u16)]
+// This is some retarded ascii encoded bullshit
+#[repr(u16)]
+#[derive(Debug, N)]
 pub enum NewLicensee {
+    Unlicensed = to_ascii_u16(0x00), 
+    Nintendo = to_ascii_u16(0x01),
+    Unknown = to_ascii_u16(0x02),
+    Capcom = to_ascii_u16(0x08),
+    EA = to_ascii_u16(0x13),
+    HudsonSoft = to_ascii_u16(0x18),
+    b_ai = to_ascii_u16(0x19),
+    KSS = to_ascii_u16(0x20),
+    Pow = to_ascii_u16(0x22),
+    PCM_Complete = to_ascii_u16(0x24),
+    San_X = to_ascii_u16(0x25),
+    Kemco_Japan = to_ascii_u16(0x28),
+    Seta = to_ascii_u16(0x29),
+    Viacom = to_ascii_u16(0x30),
+    nintendo = to_ascii_u16(0x31),
+    Bandai = to_ascii_u16(0x32),
+    ocean_acclaim = to_ascii_u16(0x33),
+    konami = to_ascii_u16(0x34),
+    Hector = to_ascii_u16(0x35),
+    Taito = to_ascii_u16(0x37),
+    Hudson = to_ascii_u16(0x38),
+    Banpresto = to_ascii_u16(0x39),
+    Ubisoft = to_ascii_u16(0x41),
+    Atlus = to_ascii_u16(0x42),
+    Malibu = to_ascii_u16(0x44),
+    Angel = to_ascii_u16(0x46),
+    Bullet_Proof = to_ascii_u16(0x47),
+    Irem = to_ascii_u16(0x49),
+    Absolute = to_ascii_u16(0x50),
+    Acclaim = to_ascii_u16(0x51),
+    Activision = to_ascii_u16(0x52),
+    American_Sammy = to_ascii_u16(0x53),
+    Konami = to_ascii_u16(0x54),
+    Hi_Tech_Entertainment = to_ascii_u16(0x55),
+    LJN = to_ascii_u16(0x56),
+    Matchbox = to_ascii_u16(0x57),
+    Mattel = to_ascii_u16(0x58),
+    Milton_Bradley = to_ascii_u16(0x59),
+    Titus = to_ascii_u16(0x60),
+    Virgin = to_ascii_u16(0x61),
+    LucasArts = to_ascii_u16(0x64),
+    Ocean = to_ascii_u16(0x67),
+    Electronic_Arts = to_ascii_u16(0x69),
+    Infogrames = to_ascii_u16(0x70),
+    Interplay = to_ascii_u16(0x71),
+    Broderbund = to_ascii_u16(0x72),
+    Sculptered_Soft = to_ascii_u16(0x73),
+    SCI = to_ascii_u16(0x75),
+    THQ = to_ascii_u16(0x78),
+    Accolade = to_ascii_u16(0x79),
+    Misawa = to_ascii_u16(0x80),
+    Lozc = to_ascii_u16(0x83),
+    Tokuma_Shoten_Intermedia = to_ascii_u16(0x86),
+    Tsukada_Original = to_ascii_u16(0x87),
+    Chun_Soft = to_ascii_u16(0x91),
+    Video_System = to_ascii_u16(0x92),
+    Ocean_Acclaim = to_ascii_u16(0x93),
+    Varie = to_ascii_u16(0x95),
+    Yonezawa = to_ascii_u16(0x96),
+    Kaneko = to_ascii_u16(0x97),
+    Pack_In_Soft = to_ascii_u16(0x99)
+}
 
+const fn to_ascii_u16(value: u8) -> u16 {
+    (((value as u16 & 0xf0) << 4) + 0x3000) + (((value as u16 & 0x0f) + 0x30))
+}
+
+#[test]
+fn test_ascii_u16_1() {
+   assert_eq!(to_ascii_u16(0x13), 0x3133)
+}
+#[test]
+fn test_ascii_u16_2() {
+   assert_eq!(to_ascii_u16(0x13), u16::from_be_bytes(*b"13"))
 }
 
 #[repr(u8)]
