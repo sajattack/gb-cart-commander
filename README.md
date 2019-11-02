@@ -20,4 +20,8 @@ OPTIONS:
 ARGS:
     <device>    Sets the device to use for the serial port connect
                 Ex: COM4 or /dev/ttyUSB0
+                
+SUBCOMMANDS:
+    help      Prints this message or the help of the given subcommand(s)
+    status    Prints info about the currently connected cartridge
 ```
