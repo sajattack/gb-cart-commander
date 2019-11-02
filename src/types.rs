@@ -1,84 +1,108 @@
-use std::fmt;
 use enumn::N;
+use std::fmt;
 
 #[repr(C)]
 #[derive(Debug)]
 pub struct StatusResponse {
-   command: u8,
-   cart_cgb: u8,
-   ver_maj: u8,
-   ver_min: u8,
-   flash_manufacturer: u8,
-   flash_device_id: u8,
-   flash_sector_group_protect: u8,
-   byte7: u8,
-   cart_logo_correct: u8,
-   cart_name: [u8;16],
-   cart_new_licensee_hi: u8,
-   cart_new_licensee_lo: u8,
-   cart_sgb: u8,
-   cart_type: u8,
-   cart_rom_size: u8,
-   cart_ram_size: u8,
-   cart_dst_code: u8,
-   cart_old_licensee: u8,
-   cart_mask_rom_version: u8,
-   cart_complement: u8,
-   cart_checksum_hi: u8,
-   cart_checksum_lo: u8,
-   // hax so it's small enough to implement debug
-   unused: [u8;20],
-   unused2: [u8;13],
-   response_checksum: [u8;2],
+    command: u8,
+    cart_cgb: u8,
+    ver_maj: u8,
+    ver_min: u8,
+    flash_manufacturer: u8,
+    flash_device_id: u8,
+    flash_sector_group_protect: u8,
+    byte7: u8,
+    cart_logo_correct: u8,
+    cart_name: [u8; 16],
+    cart_new_licensee_hi: u8,
+    cart_new_licensee_lo: u8,
+    cart_sgb: u8,
+    cart_type: u8,
+    cart_rom_size: u8,
+    cart_ram_size: u8,
+    cart_dst_code: u8,
+    cart_old_licensee: u8,
+    cart_mask_rom_version: u8,
+    cart_complement: u8,
+    cart_checksum_hi: u8,
+    cart_checksum_lo: u8,
+    // hax so it's small enough to implement debug
+    unused: [u8; 20],
+    unused2: [u8; 13],
+    response_checksum: [u8; 2],
 }
 
 impl fmt::Display for StatusResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Firmware version {:x}{:x}.{:x}{:x}", 
-            ((self.ver_maj&0xf0) >> 4), self.ver_maj&0x0f, 
-            ((self.ver_min&0xf0) >> 4), self.ver_min&0x0f
+        writeln!(
+            f,
+            "Firmware version {:x}{:x}.{:x}{:x}",
+            ((self.ver_maj & 0xf0) >> 4),
+            self.ver_maj & 0x0f,
+            ((self.ver_min & 0xf0) >> 4),
+            self.ver_min & 0x0f
         )?;
-        writeln!(f, "Game Title: {}", std::str::from_utf8(&self.cart_name)
-                 .unwrap_or(""))?;
-        writeln!(f, "CGB Only: {}", self.cart_cgb==0xC0)?;
+        writeln!(
+            f,
+            "Game Title: {}",
+            std::str::from_utf8(&self.cart_name).unwrap_or("")
+        )?;
+        writeln!(f, "CGB Only: {}", self.cart_cgb == 0xC0)?;
         writeln!(f, "Flash Manufacturer ID: {:#04x}", self.flash_manufacturer)?;
-        writeln!(f, "Flash Manufacturer Name: {:?}", 
-            FlashManufacturer::n(self.flash_manufacturer)
-                .unwrap_or(FlashManufacturer::Unknown)
+        writeln!(
+            f,
+            "Flash Manufacturer Name: {:?}",
+            FlashManufacturer::n(self.flash_manufacturer).unwrap_or(FlashManufacturer::Unknown)
         )?;
         writeln!(f, "Flash Device ID: {:#04x}", self.flash_device_id)?;
-        writeln!(f, "Nintendo logo correct: {}", self.cart_logo_correct == 0x01)?;
+        writeln!(
+            f,
+            "Nintendo logo correct: {}",
+            self.cart_logo_correct == 0x01
+        )?;
         if self.cart_old_licensee == 0x33 {
-            writeln!(f, "Cartridge Licensee: {:?}", 
-                NewLicensee::n(
-                    u16::from_be_bytes([self.cart_new_licensee_hi, self.cart_new_licensee_lo])
-                ).unwrap_or(NewLicensee::Unknown))?;
+            writeln!(
+                f,
+                "Cartridge Licensee: {:?}",
+                NewLicensee::n(u16::from_be_bytes([
+                    self.cart_new_licensee_hi,
+                    self.cart_new_licensee_lo
+                ]))
+                .unwrap_or(NewLicensee::Unknown)
+            )?;
         } else {
-            writeln!(f, "Cartridge Licensee: {:?}", 
-                OldLicensee::n(self.cart_old_licensee)
-                    .unwrap_or(OldLicensee::Unknown)
+            writeln!(
+                f,
+                "Cartridge Licensee: {:?}",
+                OldLicensee::n(self.cart_old_licensee).unwrap_or(OldLicensee::Unknown)
             )?;
         }
         writeln!(f, "SGB Enhanced: {}", self.cart_sgb != 0)?;
-        writeln!(f, "Cartridge Type: {:?}", 
+        writeln!(
+            f,
+            "Cartridge Type: {:?}",
             CartType::n(self.cart_type).unwrap_or(CartType::Unknown)
         )?;
         writeln!(f, "ROM size: {}KB", (32 << self.cart_rom_size))?;
-        writeln!(f, "RAM size: {}", 
-            match(self.cart_ram_size) {
+        writeln!(
+            f,
+            "RAM size: {}",
+            match self.cart_ram_size {
                 0x00 => "0KB",
                 0x01 => "2KB",
                 0x02 => "8KB",
                 0x03 => "32KB",
                 0x04 => "128KB",
                 0x05 => "64KB",
-                _    => "Unknown"
+                _ => "Unknown",
             }
         )?;
-        writeln!(f, "Japanese: {}", self.cart_dst_code==0x00)?;
+        writeln!(f, "Japanese: {}", self.cart_dst_code == 0x00)?;
         writeln!(f, "ROM version: {:#04x}", self.cart_mask_rom_version)?;
         writeln!(f, "Header checksum: {:#04x}", self.cart_complement)?;
-        writeln!(f, "Cartridge checksum: {:#04x}",
+        writeln!(
+            f,
+            "Cartridge checksum: {:#04x}",
             u16::from_be_bytes([self.cart_checksum_hi, self.cart_checksum_lo])
         )
     }
@@ -113,8 +137,8 @@ pub enum FlashManufacturer {
     Nexcom = 0xEF,
     Winbond = 0xDA,
     ZettaDevice = 0xBA,
-    Unknown = 0xFF
-} 
+    Unknown = 0xFF,
+}
 
 // Wew there are a lot of dupes in here
 #[repr(u8)]
@@ -140,7 +164,7 @@ pub enum OldLicensee {
     Kotobuki_Systems = 0x28,
     Seta = 0x29,
     infogrames = 0x30,
-    Nintendo = 0x31, 
+    Nintendo = 0x31,
     Bandai = 0x32,
     konami = 0x34,
     Hector = 0x35,
@@ -213,7 +237,7 @@ pub enum OldLicensee {
     Technos_Japan = 0xA9,
     broderbund = 0xAA,
     Toei_Animation = 0xAC,
-    Toho = 0xAD, 
+    Toho = 0xAD,
     Namco = 0xAF,
     acclaim = 0xB0,
     Ascii_or_Nexoft = 0xB1,
@@ -267,14 +291,14 @@ pub enum OldLicensee {
     IGS = 0xEE,
     A_Wave = 0xF0,
     Extreme_Entertainment = 0xF3,
-    LJN_
+    LJN_,
 }
 
 // This is some retarded ascii encoded bullshit
 #[repr(u16)]
 #[derive(Debug, N)]
 pub enum NewLicensee {
-    Unlicensed = to_ascii_u16(0x00), 
+    Unlicensed = to_ascii_u16(0x00),
     Nintendo = to_ascii_u16(0x01),
     Unknown = to_ascii_u16(0x02),
     Capcom = to_ascii_u16(0x08),
@@ -334,20 +358,20 @@ pub enum NewLicensee {
     Varie = to_ascii_u16(0x95),
     Yonezawa = to_ascii_u16(0x96),
     Kaneko = to_ascii_u16(0x97),
-    Pack_In_Soft = to_ascii_u16(0x99)
+    Pack_In_Soft = to_ascii_u16(0x99),
 }
 
 const fn to_ascii_u16(value: u8) -> u16 {
-    (((value as u16 & 0xf0) << 4) + 0x3000) + (((value as u16 & 0x0f) + 0x30))
+    (((value as u16 & 0xf0) << 4) + 0x3000) + ((value as u16 & 0x0f) + 0x30)
 }
 
 #[test]
 fn test_ascii_u16_1() {
-   assert_eq!(to_ascii_u16(0x13), 0x3133)
+    assert_eq!(to_ascii_u16(0x13), 0x3133)
 }
 #[test]
 fn test_ascii_u16_2() {
-   assert_eq!(to_ascii_u16(0x13), u16::from_be_bytes(*b"13"))
+    assert_eq!(to_ascii_u16(0x13), u16::from_be_bytes(*b"13"))
 }
 
 #[repr(u8)]
@@ -381,5 +405,5 @@ pub enum CartType {
     POCKET_CAMERA = 0xFC,
     BANDAI_TAMA5 = 0xFD,
     HuC3 = 0xFE,
-    HuC1_RAM_BATTERY = 0xFF
+    HuC1_RAM_BATTERY = 0xFF,
 }
