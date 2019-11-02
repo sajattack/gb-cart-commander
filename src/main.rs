@@ -5,7 +5,7 @@ use std::time::Duration;
 use std::mem::transmute;
 
 use serialport::prelude::*;
-//use crc::{crc16};
+use crc16::XMODEM;
 use clap::{App, Arg, SubCommand};
 
 use crate::types::StatusResponse;
@@ -37,23 +37,15 @@ fn main() {
     ).unwrap();
 
     if let Some(_matches) = matches.subcommand_matches("status") {
-        serialport.write(&STATUS_COMMAND).expect("failed to write bytes");
+        let status_command = [0x55, 0x04, 0x01];
+        let mut tx_buf = [0u8;72];
+        tx_buf[0..3].copy_from_slice(&status_command);
+        let checksum: u16 = crc16::State::<XMODEM>::calculate(&tx_buf[0..70]);
+        tx_buf[70..72].copy_from_slice(&checksum.to_be_bytes());
+        serialport.write(&tx_buf).expect("failed to write bytes");
         let mut rx_buf = [0u8;72];
         serialport.read(&mut rx_buf).expect("failed to read bytes");
         let stat_rx = unsafe { transmute::<[u8;72], StatusResponse>(rx_buf) };
         println!("{}", stat_rx);
     }
 }
-
-static STATUS_COMMAND: [u8;72] = [
-    0x55, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x36
-];
-
