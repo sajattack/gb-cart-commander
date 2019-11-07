@@ -3,7 +3,7 @@ use std::fmt;
 
 #[repr(C)]
 #[derive(Debug)]
-pub struct StatusResponse {
+pub struct InfoResponse {
     command: u8,
     cart_cgb: u8,
     ver_maj: u8,
@@ -32,7 +32,7 @@ pub struct StatusResponse {
     response_checksum: [u8; 2],
 }
 
-impl fmt::Display for StatusResponse {
+impl fmt::Display for InfoResponse {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
             f,
