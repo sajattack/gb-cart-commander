@@ -13,7 +13,7 @@ use serialport::prelude::*;
 use crate::types::InfoResponse;
 
 fn main() {
-    let matches = App::new("GB Cart Commander")
+    let app = App::new("GB Cart Commander")
         .version("0.1")
         .author("Paul Sajna <sajattack@gmail.com>")
         .about("Command-line tool for ATmega8515-based Gameboy Cartridge Reader/Writers")
@@ -74,8 +74,12 @@ fn main() {
                     .required(true)
                 )
             .about("Read flash or ram on a cart")
-        )
-    .get_matches();
+        );
+        // TODO this is gross find something better
+        let mut helptext = String::new();
+        helptext.push_str(std::str::from_utf8(&[0u8;705]).unwrap());
+        unsafe { app.write_help(&mut helptext.as_bytes_mut()).unwrap(); }
+        let matches = app.get_matches();
         
 
     let mut settings: SerialPortSettings = Default::default();
@@ -143,8 +147,6 @@ fn main() {
             }
         },
         (_, Some(sub)) => println!("{}", sub.usage()),
-        (_, None) => () // I'd like to print the full help here but I'm not sure how 
-                        // since get_matches() consumes the app and prevents me 
-                        // from doing so
+        (_, None) => println!("{}", helptext),
     }
 }
