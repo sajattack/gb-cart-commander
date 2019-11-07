@@ -42,12 +42,6 @@ impl fmt::Display for InfoResponse {
             ((self.ver_min & 0xf0) >> 4),
             self.ver_min & 0x0f
         )?;
-        writeln!(
-            f,
-            "Game Title: {}",
-            std::str::from_utf8(&self.cart_name).unwrap_or("")
-        )?;
-        writeln!(f, "CGB Only: {}", self.cart_cgb == 0xC0)?;
         writeln!(f, "Flash Manufacturer ID: {:#04x}", self.flash_manufacturer)?;
         writeln!(
             f,
@@ -55,56 +49,61 @@ impl fmt::Display for InfoResponse {
             FlashManufacturer::n(self.flash_manufacturer).unwrap_or(FlashManufacturer::Unknown)
         )?;
         writeln!(f, "Flash Device ID: {:#04x}", self.flash_device_id)?;
-        writeln!(
-            f,
-            "Nintendo logo correct: {}",
-            self.cart_logo_correct == 0x01
-        )?;
-        if self.cart_old_licensee == 0x33 {
+        if self.cart_logo_correct == 1 {
             writeln!(
                 f,
-                "Cartridge Licensee: {:?}",
-                NewLicensee::n(u16::from_be_bytes([
-                    self.cart_new_licensee_hi,
-                    self.cart_new_licensee_lo
-                ]))
-                .unwrap_or(NewLicensee::Unknown)
+                "Game Title: {}",
+                std::str::from_utf8(&self.cart_name).unwrap_or("")
             )?;
-        } else {
-            writeln!(
-                f,
-                "Cartridge Licensee: {:?}",
-                OldLicensee::n(self.cart_old_licensee).unwrap_or(OldLicensee::Unknown)
-            )?;
-        }
-        writeln!(f, "SGB Enhanced: {}", self.cart_sgb != 0)?;
-        writeln!(
-            f,
-            "Cartridge Type: {:?}",
-            CartType::n(self.cart_type).unwrap_or(CartType::Unknown)
-        )?;
-        writeln!(f, "ROM size: {}KB", (32 << self.cart_rom_size))?;
-        writeln!(
-            f,
-            "RAM size: {}",
-            match self.cart_ram_size {
-                0x00 => "0KB",
-                0x01 => "2KB",
-                0x02 => "8KB",
-                0x03 => "32KB",
-                0x04 => "128KB",
-                0x05 => "64KB",
-                _ => "Unknown",
+            writeln!(f, "CGB Only: {}", self.cart_cgb == 0xC0)?;
+            if self.cart_old_licensee == 0x33 {
+                writeln!(
+                    f,
+                    "Cartridge Licensee: {:?}",
+                    NewLicensee::n(u16::from_be_bytes([
+                        self.cart_new_licensee_hi,
+                        self.cart_new_licensee_lo
+                    ]))
+                    .unwrap_or(NewLicensee::Unknown)
+                )?;
+            } else {
+                writeln!(
+                    f,
+                    "Cartridge Licensee: {:?}",
+                    OldLicensee::n(self.cart_old_licensee).unwrap_or(OldLicensee::Unknown)
+                )?;
             }
-        )?;
-        writeln!(f, "Japanese: {}", self.cart_dst_code == 0x00)?;
-        writeln!(f, "ROM version: {:#04x}", self.cart_mask_rom_version)?;
-        writeln!(f, "Header checksum: {:#04x}", self.cart_complement)?;
-        writeln!(
-            f,
-            "Cartridge checksum: {:#04x}",
-            u16::from_be_bytes([self.cart_checksum_hi, self.cart_checksum_lo])
-        )
+            writeln!(f, "SGB Enhanced: {}", self.cart_sgb != 0)?;
+            writeln!(
+                f,
+                "Cartridge Type: {:?}",
+                CartType::n(self.cart_type).unwrap_or(CartType::Unknown)
+            )?;
+            writeln!(f, "ROM size: {}KB", (32 << self.cart_rom_size))?;
+            writeln!(
+                f,
+                "RAM size: {}",
+                match self.cart_ram_size {
+                    0x00 => "0KB",
+                    0x01 => "2KB",
+                    0x02 => "8KB",
+                    0x03 => "32KB",
+                    0x04 => "128KB",
+                    0x05 => "64KB",
+                    _ => "Unknown",
+                }
+            )?;
+            writeln!(f, "Japanese: {}", self.cart_dst_code == 0x00)?;
+            writeln!(f, "ROM version: {:#04x}", self.cart_mask_rom_version)?;
+            writeln!(f, "Header checksum: {:#04x}", self.cart_complement)?;
+            writeln!(
+                f,
+                "Cartridge checksum: {:#04x}",
+                u16::from_be_bytes([self.cart_checksum_hi, self.cart_checksum_lo])
+            )
+        } else {
+            write!(f, "Cartridge is blank, damaged, unlicensed, or disconnected (logo incorrect)")
+        }
     }
 }
 

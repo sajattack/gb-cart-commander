@@ -39,8 +39,6 @@ fn main() {
         .subcommand(
             SubCommand::with_name("erase")
                 .arg(Arg::with_name("what")
-                    .index(1)
-                    .default_value("flash")
                     .possible_values(&["flash", "ram"])
                 ) 
             .about("Erase flash or ram on a flash cart")
@@ -48,37 +46,28 @@ fn main() {
         .subcommand(
             SubCommand::with_name("write")
                 .arg(Arg::with_name("what")
-                    .index(1)
-                    .default_value("flash")
                     .possible_values(&["flash", "ram"])
-                    .help("flash or ram")
                     .required(true)
                 )
                 .arg(Arg::with_name("file")
-                    .index(2) // this doesn't work when the default value is used for "what"
-                    .required(true)
+                     .required(true)
                 )
             .about("Write flash or ram on a flash cart")
         )
         .subcommand(
             SubCommand::with_name("read")
                 .arg(Arg::with_name("what")
-                    .index(1)
-                    .default_value("flash")
                     .possible_values(&["flash", "ram"])
-                    .help("flash or ram")
                     .required(true)
                 )
                 .arg(Arg::with_name("file")
-                    .index(2) // this doesn't work when the default value is used for "what"
-                    .required(true)
+                     .required(true)
                 )
             .about("Read flash or ram on a cart")
         );
-        // TODO this is gross find something better
-        let mut helptext = String::new();
-        helptext.push_str(std::str::from_utf8(&[0u8;705]).unwrap());
-        unsafe { app.write_help(&mut helptext.as_bytes_mut()).unwrap(); }
+        let mut helptext_vec = vec![0u8; 705];
+        app.write_help(&mut helptext_vec).unwrap();
+        let helptext = String::from_utf8(helptext_vec).unwrap(); 
         let matches = app.get_matches();
         
 
@@ -135,7 +124,7 @@ fn main() {
                 Some("flash") => (),
                 Some("ram") => (),
                 Some(_) => println!("{}", sub.usage()),
-                None => println!("{}", sub.usage()),
+                None =>  println!("{}", sub.usage()),
             }
         },
         ("read", Some(sub)) => {
