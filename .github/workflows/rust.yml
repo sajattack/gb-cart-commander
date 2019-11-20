@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Install Deps
+      run: apt-get install -y libudev-dev
     - uses: actions/checkout@v1
     - name: Build
       run: cargo build --verbose
