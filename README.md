@@ -1,4 +1,5 @@
-# GB Cart Commander 0.1
+```
+GB Cart Commander 0.1
 Paul Sajna <sajattack@gmail.com>
 Command-line tool for ATmega8515-based Gameboy Cartridge Reader/Writers
 
@@ -23,3 +24,4 @@ SUBCOMMANDS:
     info     Prints info about the currently connected cartridge
     read     Read flash or ram on a cart
     write    Write flash or ram on a flash cart
+```
