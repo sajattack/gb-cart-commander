@@ -1,13 +1,9 @@
-# gb-cart-commander
+# GB Cart Commander 0.1
+Paul Sajna <sajattack@gmail.com>
 Command-line tool for ATmega8515-based Gameboy Cartridge Reader/Writers
 
-```
-GB Cart Commander 0.1
-Paul Sajna <sajattack@gmail.com>
-Command-line tool for ATMega8515-based Gameboy Cartridge Reader/Writers
-
 USAGE:
-    gb-cart-commander [OPTIONS] [device] [SUBCOMMAND]
+    gb-cart-commander [OPTIONS] <device> [SUBCOMMAND]
 
 FLAGS:
     -h, --help       Prints help information
@@ -20,8 +16,10 @@ OPTIONS:
 ARGS:
     <device>    Sets the device to use for the serial port connect
                 Ex: COM4 or /dev/ttyUSB0
-                
+
 SUBCOMMANDS:
-    help      Prints this message or the help of the given subcommand(s)
-    status    Prints info about the currently connected cartridge
-```
+    erase    Erase flash or ram on a flash cart
+    help     Prints this message or the help of the given subcommand(s)
+    info     Prints info about the currently connected cartridge
+    read     Read flash or ram on a cart
+    write    Write flash or ram on a flash cart
