@@ -25,3 +25,5 @@ SUBCOMMANDS:
     read     Read flash or ram on a cart
     write    Write flash or ram on a flash cart
 ```
+
+Compatible open-source cart flasher https://github.com/melka/gbcartflasher
