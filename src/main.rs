@@ -165,7 +165,7 @@ fn main() {
                     let mut page_index: u16 = 0;
                     for i in 0..n_packets { 
                         page_index = i as u16 / 256;
-                        println!("{}", page_index);
+                        //println!("{}", page_index);
                         tx_buf[0..3].copy_from_slice(&[0x55, 0x01, 00]);
                         tx_buf[3] = i as u8;
                         tx_buf[4..6].copy_from_slice(&page_index.to_be_bytes());
@@ -177,15 +177,15 @@ fn main() {
                         //TODO check the reponse
                     }
                 },
-                Some("ram") => (),
+                Some("ram") => unimplemented!(),
                 Some(_) => println!("{}", sub.usage()),
                 None =>  println!("{}", sub.usage()),
             }
         },
         ("read", Some(sub)) => {
             match sub.value_of("what") {
-                Some("flash") => (),
-                Some("ram") => (),
+                Some("flash") => unimplemented!(),
+                Some("ram") => unimplemented!(),
                 Some(_) => println!("{}", sub.usage()),
                 None => println!("{}", sub.usage()),
             }
